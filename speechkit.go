@@ -22,7 +22,6 @@ const URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 
 var (
 	speechSpeed    = float32(1.0)
-	speechVoice    = "male"
 	speechLanguage = "ru-RU"
 	speechFormat   = "oggopus"
 	textMaxLen     = 2000

@@ -19,12 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-go@v1
+
     - uses: FedericoCarboni/setup-ffmpeg@v1
       with:
-        go-version: 1.15
         token: ${{ secrets.GITHUB_TOKEN }}
       id: setup-ffmpeg
+
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.15
 
     - name: Run Test
       run: go mod tidy && go test ./...
