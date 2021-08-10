@@ -165,12 +165,22 @@ func (c *SpeechKitClient) doRequest(text, fileName string) error {
 }
 
 func (c *SpeechKitClient) convertToMP3() error {
-	pathToOutFile := path.Join(path.Dir(c.pathToFiles), "output.txt")
-	pathToMP3 := path.Join(path.Dir(c.pathToFiles), fmt.Sprintf("%s.mp3", c.text[:20]))
+	var bound int
+	pathToOutFile := path.Join(c.pathToFiles, "output.txt")
+
+	if len(c.text) > 20 {
+		bound = 20
+	} else {
+		bound = 1
+	}
+
+	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", c.text[:bound]))
+	pathToMP3 := path.Join(c.pathToFiles, mp3FileName)
 
 	cmd := exec.Command(
 		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", pathToOutFile, "-vn", "-ar", "44100", "-ac", "2", "-ab", "128k", "-f", "mp3", pathToMP3,
 	)
+
 	err := cmd.Run()
 	// Debug exec commands
 	var out bytes.Buffer
@@ -198,7 +208,7 @@ func splitTextToParts(text string) ([]string, error) {
 		var finalString string
 		for _, word := range strings.Split(text[start:stop], " ") {
 			s := strings.Map(removeNonUTF, word)
-			finalString = finalString + s
+			finalString = finalString + s + " "
 		}
 		textSlice = append(textSlice, finalString)
 	}

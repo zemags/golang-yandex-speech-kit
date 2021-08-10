@@ -1,0 +1,6 @@
+export API_KEY=
+curl -X POST \
+     -H "Authorization: Api-Key ${API_KEY}" \
+     --data-urlencode "text=Мгновенно воцарилась глубокая тишина: гроши слабо звякали, ударяясь друг о друга." \
+     -d "lang=ru-RU&voice=alena" \
+     "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize" > 1.ogg
