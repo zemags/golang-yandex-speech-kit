@@ -28,6 +28,12 @@ jobs:
     - uses: actions/setup-go@v1
       with:
         go-version: 1.15
-
+      env:
+          API_KEY: ${{ secrets.API_KEY }}
     - name: Run Test
       run: go mod tidy && go test ./...
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}

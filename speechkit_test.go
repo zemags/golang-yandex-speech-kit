@@ -2,11 +2,14 @@ package speechkit
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"path"
 	"strings"
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -123,4 +126,55 @@ func TestCreateFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, file)
 	os.Remove(path.Join(pathToNewFile, output))
+}
+
+func TestDoRequest(t *testing.T) {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+
+	APIKey, exists := os.LookupEnv("API_KEY")
+	if !exists {
+		APIKey = os.Getenv("API_KEY")
+	}
+
+	currentDir, _ := os.Getwd()
+	pathToFiles := path.Join(currentDir, "temp")
+	os.Mkdir(pathToFiles, 0755)
+	text := "Мгновенно воцарилась глубокая тишина"
+	client := SpeechKitClient{
+		APIParams{
+			Client: &http.Client{},
+			APIKey: APIKey,
+		},
+		SpeechParams{
+			pathToFiles: pathToFiles,
+		},
+	}
+	actual := client.doRequest(text, "1.ogg")
+	assert.Nil(t, actual)
+	assert.FileExists(t, path.Join(pathToFiles, "1.ogg"))
+	os.RemoveAll(pathToFiles)
+
+	// test errors
+	client = SpeechKitClient{
+		APIParams{
+			Client: &http.Client{},
+			APIKey: "invalid-api-key",
+		},
+		SpeechParams{
+			pathToFiles: pathToFiles,
+		},
+	}
+	err := client.doRequest(text, "1.ogg")
+	assert.EqualError(
+		t, err, "error: api occurred with status: 401",
+	)
+
+	client.pathToFiles = "invalid path to folder"
+	client.APIKey = APIKey
+	err = client.doRequest(text, "1.ogg")
+	assert.EqualError(
+		t, err, "error: occurred while creating audio file: open invalid path to folder/1.ogg: no such file or directory",
+	)
 }
