@@ -140,7 +140,7 @@ func TestDoRequest(t *testing.T) {
 
 	currentDir, _ := os.Getwd()
 	pathToFiles := path.Join(currentDir, "temp")
-	os.Mkdir(pathToFiles, 0755)
+	_ = os.Mkdir(pathToFiles, 0755)
 	text := "Мгновенно воцарилась глубокая тишина"
 	client := SpeechKitClient{
 		APIParams{
