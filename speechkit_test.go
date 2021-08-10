@@ -69,3 +69,58 @@ func TestConvertToMP3(t *testing.T) {
 	err = client.convertToMP3()
 	assert.Error(t, err)
 }
+
+func TestGenerateURL(t *testing.T) {
+	client := SpeechKitClient{
+		APIParams{},
+		SpeechParams{
+			text:    "Lorem Ipsum is simply dummy.",
+			speed:   0.0,
+			emotion: "neutral",
+			voice:   "female",
+		},
+	}
+	actual := client.generateURL("Lorem Ipsum is simply dummy.")
+
+	expected := "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=alena"
+
+	assert.Equal(t, actual, expected)
+
+	client.SpeechParams.voice = "male"
+	actual = client.generateURL("Lorem Ipsum is simply dummy.")
+	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
+	assert.Equal(t, actual, expected)
+
+	client.SpeechParams.voice = ""
+	actual = client.generateURL("Lorem Ipsum is simply dummy.")
+	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
+	assert.Equal(t, actual, expected)
+
+}
+
+func TestCreateFile(t *testing.T) {
+	currentDir, _ := os.Getwd()
+	pathToExistFile := path.Join(currentDir, "data")
+	client := SpeechKitClient{
+		APIParams{},
+		SpeechParams{
+			pathToFiles: pathToExistFile,
+		},
+	}
+	file, err := client.createFile()
+	assert.Error(t, err)
+	assert.Nil(t, file)
+
+	output = "new_test_file.txt"
+	pathToNewFile := path.Join(currentDir, "data")
+	client = SpeechKitClient{
+		APIParams{},
+		SpeechParams{
+			pathToFiles: pathToNewFile,
+		},
+	}
+	file, err = client.createFile()
+	assert.NoError(t, err)
+	assert.NotNil(t, file)
+	os.Remove(path.Join(pathToNewFile, output))
+}

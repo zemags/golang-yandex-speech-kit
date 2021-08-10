@@ -4,7 +4,6 @@
 package speechkit
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -80,7 +79,10 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 		if err != nil {
 			return err
 		}
-		output.WriteString(fmt.Sprintf("file '%s'\n", fileName))
+		_, err = output.WriteString(fmt.Sprintf("file '%s'\n", fileName))
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := c.convertToMP3(); err != nil {
@@ -93,7 +95,7 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 // createFile output file by audio parts
 func (c *SpeechKitClient) createFile() (*os.File, error) {
 	// check if file exists
-	output := path.Join(path.Dir(c.pathToFiles), output)
+	output := path.Join(c.pathToFiles, output)
 	var _, err = os.Stat(output)
 	// create file if not exists
 	if os.IsNotExist(err) {
@@ -103,11 +105,11 @@ func (c *SpeechKitClient) createFile() (*os.File, error) {
 		}
 		return file, err
 	}
-	return nil, errors.New("error: unexpected error while creating file")
+	return nil, errors.New("error: file already exists")
 }
 
 // generateURL prepare url with voice opts
-func (c *SpeechKitClient) generateURL(text string) *strings.Reader {
+func (c *SpeechKitClient) generateURL(text string) string {
 	if c.SpeechParams.speed == 0.0 {
 		c.SpeechParams.speed = speechSpeed
 	}
@@ -119,22 +121,22 @@ func (c *SpeechKitClient) generateURL(text string) *strings.Reader {
 		c.SpeechParams.voice = "filipp"
 	} else {
 		// set default
-		c.SpeechParams.voice = speechVoice
+		c.SpeechParams.voice = "filipp"
 	}
 
 	v := url.Values{}
-	v.Add("text", c.SpeechParams.text)
-	v.Add("speed", fmt.Sprintf("%f", c.SpeechParams.speed))
+	v.Add("text", text)
+	v.Add("speed", fmt.Sprintf("%.2f", c.SpeechParams.speed))
 	v.Add("emotion", c.SpeechParams.emotion)
 	v.Add("voice", c.SpeechParams.voice)
 	v.Add("lang", speechLanguage)
 	v.Add("format", speechFormat)
-	return strings.NewReader(v.Encode())
+	return v.Encode()
 }
 
 // doRequest make request and save content in 'oggopus' format
 func (c *SpeechKitClient) doRequest(text, fileName string) error {
-	body := c.generateURL(text)
+	body := strings.NewReader(c.generateURL(text))
 	req, err := http.NewRequest(http.MethodPost, URL, body)
 	if err != nil {
 		return err
@@ -183,14 +185,8 @@ func (c *SpeechKitClient) convertToMP3() error {
 	)
 
 	err := cmd.Run()
-	// Debug exec commands
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
 	if err != nil {
-		return errors.Wrap(err, "error occured while generating mp3 from parts")
+		return errors.Wrap(err, "error occured while generating mp3 from ogg parts")
 	}
 	return nil
 }
