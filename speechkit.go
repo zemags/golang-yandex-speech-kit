@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// URL provided remote host to yandex speech kit api
 const URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 
 var (
@@ -30,7 +31,7 @@ var (
 )
 
 // SpeechKitClient main client for generating audio
-type SpeechKitClient struct {
+type SpeechKitClient struct { //nolint
 	APIParams
 	SpeechParams
 }
@@ -38,7 +39,7 @@ type SpeechKitClient struct {
 // APIParams define how access remote yandex api endpoint
 type APIParams struct {
 	Client *http.Client
-	ApiKey string
+	APIKey string
 }
 
 // SpeechParams user options for audio
@@ -50,7 +51,7 @@ type SpeechParams struct {
 	pathToFiles string
 }
 
-// NewCLI create new client
+// NewSpeechKitClient create new client
 func NewSpeechKitClient(apiParams APIParams, speechParams SpeechParams) *SpeechKitClient {
 	return &SpeechKitClient{
 		APIParams:    apiParams,
@@ -105,8 +106,8 @@ func (c *SpeechKitClient) createFile() (*os.File, error) {
 	return nil, errors.New("error: unexpected error while creating file")
 }
 
-// generateUrl prepare url with voice opts
-func (c *SpeechKitClient) generateUrl(text string) *strings.Reader {
+// generateURL prepare url with voice opts
+func (c *SpeechKitClient) generateURL(text string) *strings.Reader {
 	if c.SpeechParams.speed == 0.0 {
 		c.SpeechParams.speed = speechSpeed
 	}
@@ -133,13 +134,13 @@ func (c *SpeechKitClient) generateUrl(text string) *strings.Reader {
 
 // doRequest make request and save content in 'oggopus' format
 func (c *SpeechKitClient) doRequest(text, fileName string) error {
-	body := c.generateUrl(text)
+	body := c.generateURL(text)
 	req, err := http.NewRequest(http.MethodPost, URL, body)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-	req.Header.Add("Authorization", fmt.Sprintf("Api-Key %s", c.APIParams.ApiKey))
+	req.Header.Add("Authorization", fmt.Sprintf("Api-Key %s", c.APIParams.APIKey))
 
 	response, err := c.APIParams.Client.Do(req)
 	if err != nil {
