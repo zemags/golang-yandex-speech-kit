@@ -54,3 +54,5 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.lcov
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
