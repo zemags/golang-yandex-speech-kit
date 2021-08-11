@@ -43,7 +43,6 @@ type APIParams struct {
 
 // SpeechParams user options for audio
 type SpeechParams struct {
-	text        string
 	emotion     string
 	voice       string
 	speed       float32
@@ -73,7 +72,7 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 
 	for fileIndex, textPart := range textParts {
 		fileName := fmt.Sprintf("%v.ogg", fileIndex)
-
+		fmt.Println()
 		err := c.doRequest(textPart, fileName)
 
 		if err != nil {
@@ -85,7 +84,7 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 		}
 	}
 
-	if err := c.convertToMP3(); err != nil {
+	if err := c.convertToMP3(text); err != nil {
 		return err
 	}
 
@@ -148,9 +147,6 @@ func (c *SpeechKitClient) doRequest(text, fileName string) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	req.Header.Add("Authorization", fmt.Sprintf("Api-Key %s", c.APIParams.APIKey))
 
-	// fmt.Println(">>", os.Getenv("APP_KEY"))
-	fmt.Println(req)
-
 	response, err := c.APIParams.Client.Do(req)
 	if err != nil {
 		return err
@@ -175,17 +171,17 @@ func (c *SpeechKitClient) doRequest(text, fileName string) error {
 	return nil
 }
 
-func (c *SpeechKitClient) convertToMP3() error {
+func (c *SpeechKitClient) convertToMP3(text string) error {
 	var bound int
-	pathToOutFile := path.Join(c.pathToFiles, "output.txt")
+	pathToOutFile := path.Join(c.pathToFiles, output)
 
-	if len(c.text) > 20 {
+	if len(text) > 20 {
 		bound = 20
 	} else {
 		bound = 1
 	}
 
-	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", c.text[:bound]))
+	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:bound]))
 	pathToMP3 := path.Join(c.pathToFiles, mp3FileName)
 
 	cmd := exec.Command(

@@ -2,6 +2,7 @@ package speechkit
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -53,10 +54,9 @@ func TestConvertToMP3(t *testing.T) {
 		APIParams{},
 		SpeechParams{
 			pathToFiles: pathToMp3,
-			text:        text,
 		},
 	}
-	err := client.convertToMP3()
+	err := client.convertToMP3(text)
 	assert.NoError(t, err)
 
 	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:20]))
@@ -66,36 +66,35 @@ func TestConvertToMP3(t *testing.T) {
 		APIParams{},
 		SpeechParams{
 			pathToFiles: path.Join(currentDir, "not_exist_folder"),
-			text:        text,
 		},
 	}
-	err = client.convertToMP3()
+	err = client.convertToMP3(text)
 	assert.Error(t, err)
 }
 
 func TestGenerateURL(t *testing.T) {
+	text := "Lorem Ipsum is simply dummy."
 	client := SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			text:    "Lorem Ipsum is simply dummy.",
 			speed:   0.0,
 			emotion: "neutral",
 			voice:   "female",
 		},
 	}
-	actual := client.generateURL("Lorem Ipsum is simply dummy.")
+	actual := client.generateURL(text)
 
 	expected := "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=alena"
 
 	assert.Equal(t, actual, expected)
 
 	client.SpeechParams.voice = "male"
-	actual = client.generateURL("Lorem Ipsum is simply dummy.")
+	actual = client.generateURL(text)
 	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
 	assert.Equal(t, actual, expected)
 
 	client.SpeechParams.voice = ""
-	actual = client.generateURL("Lorem Ipsum is simply dummy.")
+	actual = client.generateURL(text)
 	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
 	assert.Equal(t, actual, expected)
 
@@ -177,4 +176,46 @@ func TestDoRequest(t *testing.T) {
 	assert.EqualError(
 		t, err, "error: occurred while creating audio file: open invalid path to folder/1.ogg: no such file or directory",
 	)
+}
+
+func TestCreateAudio(t *testing.T) {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+
+	APIKey, exists := os.LookupEnv("API_KEY")
+	if !exists {
+		APIKey = os.Getenv("API_KEY")
+	}
+
+	textMaxLen = 2000
+
+	currentDir, _ := os.Getwd()
+	pathToFiles := path.Join(currentDir, "temp")
+	_ = os.Mkdir(pathToFiles, 0755)
+
+	client := SpeechKitClient{
+		APIParams{
+			Client: &http.Client{},
+			APIKey: APIKey,
+		},
+		SpeechParams{
+			pathToFiles: pathToFiles,
+		},
+	}
+
+	pathToSampleText := path.Join(currentDir, "data", "sample_text.txt")
+	text, err := ioutil.ReadFile(pathToSampleText)
+	if err != nil {
+		log.Fatal("Error occurred while opening sample_text.txt")
+	}
+
+	err = client.CreateAudio(string(text))
+	assert.NoError(t, err)
+
+	os.RemoveAll(pathToFiles)
+
+	err = client.CreateAudio("")
+	assert.Error(t, err)
+
 }
