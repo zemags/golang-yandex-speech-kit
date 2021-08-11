@@ -178,11 +178,13 @@ func (c *SpeechKitClient) convertToMP3(text string) error {
 	if len(text) > 20 {
 		bound = 20
 	} else {
-		bound = 1
+		bound = len(text)
 	}
 
 	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:bound]))
 	pathToMP3 := path.Join(c.pathToFiles, mp3FileName)
+
+	fmt.Println(pathToOutFile, pathToMP3)
 
 	cmd := exec.Command(
 		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", pathToOutFile, "-vn", "-ar", "44100", "-ac", "2", "-ab", "128k", "-f", "mp3", pathToMP3,

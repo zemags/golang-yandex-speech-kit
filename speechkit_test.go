@@ -61,6 +61,16 @@ func TestConvertToMP3(t *testing.T) {
 
 	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:20]))
 	assert.FileExists(t, path.Join(pathToMp3, mp3FileName))
+	os.Remove(path.Join(pathToMp3, mp3FileName))
+
+	text = "Мгновенно"
+	err = client.convertToMP3(text)
+	assert.Nil(t, err)
+
+	l := len(text)
+	mp3FileName = strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:l]))
+	assert.FileExists(t, path.Join(pathToMp3, mp3FileName))
+	os.Remove(path.Join(pathToMp3, mp3FileName))
 
 	client = SpeechKitClient{
 		APIParams{},
@@ -217,5 +227,4 @@ func TestCreateAudio(t *testing.T) {
 
 	err = client.CreateAudio("")
 	assert.Error(t, err)
-
 }
