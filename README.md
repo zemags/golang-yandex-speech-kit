@@ -2,3 +2,9 @@
 
 
 Small simple SDK to convert text to audio by Yandex Speech Kit Service.
+Example:
+```go
+package main
+
+...
+``
