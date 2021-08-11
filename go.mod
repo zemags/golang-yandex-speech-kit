@@ -1,4 +1,4 @@
-module github.com/zemags/go-yandex-speech-kit-sdk
+module github.com/zemags/golang-yandex-speech-kit
 
 go 1.15
 
