@@ -53,7 +53,7 @@ func TestConvertToMP3(t *testing.T) {
 	client := SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			pathToFiles: pathToMp3,
+			PathToFiles: pathToMp3,
 		},
 	}
 	err := client.convertToMP3(text)
@@ -75,7 +75,7 @@ func TestConvertToMP3(t *testing.T) {
 	client = SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			pathToFiles: path.Join(currentDir, "not_exist_folder"),
+			PathToFiles: path.Join(currentDir, "not_exist_folder"),
 		},
 	}
 	err = client.convertToMP3(text)
@@ -87,9 +87,9 @@ func TestGenerateURL(t *testing.T) {
 	client := SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			speed:   0.0,
-			emotion: "neutral",
-			voice:   "female",
+			Speed:   0.0,
+			Emotion: "neutral",
+			Voice:   "female",
 		},
 	}
 	actual := client.generateURL(text)
@@ -98,12 +98,12 @@ func TestGenerateURL(t *testing.T) {
 
 	assert.Equal(t, actual, expected)
 
-	client.SpeechParams.voice = "male"
+	client.SpeechParams.Voice = "male"
 	actual = client.generateURL(text)
 	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
 	assert.Equal(t, actual, expected)
 
-	client.SpeechParams.voice = ""
+	client.SpeechParams.Voice = ""
 	actual = client.generateURL(text)
 	expected = "emotion=neutral&format=oggopus&lang=ru-RU&speed=1.00&text=Lorem+Ipsum+is+simply+dummy.&voice=filipp"
 	assert.Equal(t, actual, expected)
@@ -116,7 +116,7 @@ func TestCreateFile(t *testing.T) {
 	client := SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			pathToFiles: pathToExistFile,
+			PathToFiles: pathToExistFile,
 		},
 	}
 	file, err := client.createFile()
@@ -128,7 +128,7 @@ func TestCreateFile(t *testing.T) {
 	client = SpeechKitClient{
 		APIParams{},
 		SpeechParams{
-			pathToFiles: pathToNewFile,
+			PathToFiles: pathToNewFile,
 		},
 	}
 	file, err = client.createFile()
@@ -148,8 +148,8 @@ func TestDoRequest(t *testing.T) {
 	}
 
 	currentDir, _ := os.Getwd()
-	pathToFiles := path.Join(currentDir, "temp")
-	_ = os.Mkdir(pathToFiles, 0755)
+	PathToFiles := path.Join(currentDir, "temp")
+	_ = os.Mkdir(PathToFiles, 0755)
 	text := "Мгновенно воцарилась глубокая тишина"
 	client := SpeechKitClient{
 		APIParams{
@@ -157,13 +157,13 @@ func TestDoRequest(t *testing.T) {
 			APIKey: APIKey,
 		},
 		SpeechParams{
-			pathToFiles: pathToFiles,
+			PathToFiles: PathToFiles,
 		},
 	}
 	actual := client.doRequest(text, "1.ogg")
 	assert.Nil(t, actual)
-	assert.FileExists(t, path.Join(pathToFiles, "1.ogg"))
-	os.RemoveAll(pathToFiles)
+	assert.FileExists(t, path.Join(PathToFiles, "1.ogg"))
+	os.RemoveAll(PathToFiles)
 
 	// test errors
 	client = SpeechKitClient{
@@ -172,7 +172,7 @@ func TestDoRequest(t *testing.T) {
 			APIKey: "invalid-api-key",
 		},
 		SpeechParams{
-			pathToFiles: pathToFiles,
+			PathToFiles: PathToFiles,
 		},
 	}
 	err := client.doRequest(text, "1.ogg")
@@ -180,7 +180,7 @@ func TestDoRequest(t *testing.T) {
 		t, err, "error: api occurred with status: 401",
 	)
 
-	client.pathToFiles = "invalid path to folder"
+	client.PathToFiles = "invalid path to folder"
 	client.APIKey = APIKey
 	err = client.doRequest(text, "1.ogg")
 	assert.EqualError(
@@ -201,8 +201,8 @@ func TestCreateAudio(t *testing.T) {
 	textMaxLen = 2000
 
 	currentDir, _ := os.Getwd()
-	pathToFiles := path.Join(currentDir, "temp")
-	_ = os.Mkdir(pathToFiles, 0755)
+	PathToFiles := path.Join(currentDir, "temp")
+	_ = os.Mkdir(PathToFiles, 0755)
 
 	client := SpeechKitClient{
 		APIParams{
@@ -210,7 +210,7 @@ func TestCreateAudio(t *testing.T) {
 			APIKey: APIKey,
 		},
 		SpeechParams{
-			pathToFiles: pathToFiles,
+			PathToFiles: PathToFiles,
 		},
 	}
 
@@ -223,7 +223,7 @@ func TestCreateAudio(t *testing.T) {
 	err = client.CreateAudio(string(text))
 	assert.NoError(t, err)
 
-	os.RemoveAll(pathToFiles)
+	os.RemoveAll(PathToFiles)
 
 	err = client.CreateAudio("")
 	assert.Error(t, err)

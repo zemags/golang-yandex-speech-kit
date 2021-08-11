@@ -1,5 +1,5 @@
-// Simple SDK to sythesize russian voice from text with
-// Yandex Speech Kit Service premium voices
+// Simple SDK to sythesize russian Voice from text with
+// Yandex Speech Kit Service premium Voices
 
 package speechkit
 
@@ -43,10 +43,10 @@ type APIParams struct {
 
 // SpeechParams user options for audio
 type SpeechParams struct {
-	emotion     string
-	voice       string
-	speed       float32
-	pathToFiles string
+	Emotion     string
+	Voice       string
+	Speed       float32
+	PathToFiles string
 }
 
 // NewSpeechKitClient create new client
@@ -72,7 +72,6 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 
 	for fileIndex, textPart := range textParts {
 		fileName := fmt.Sprintf("%v.ogg", fileIndex)
-		fmt.Println()
 		err := c.doRequest(textPart, fileName)
 
 		if err != nil {
@@ -94,7 +93,7 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 // createFile output file by audio parts
 func (c *SpeechKitClient) createFile() (*os.File, error) {
 	// check if file exists
-	output := path.Join(c.pathToFiles, output)
+	output := path.Join(c.PathToFiles, output)
 	var _, err = os.Stat(output)
 	// create file if not exists
 	if os.IsNotExist(err) {
@@ -107,31 +106,31 @@ func (c *SpeechKitClient) createFile() (*os.File, error) {
 	return nil, errors.New("error: file already exists")
 }
 
-// generateURL prepare url with voice opts
+// generateURL prepare url with Voice opts
 func (c *SpeechKitClient) generateURL(text string) string {
-	if c.SpeechParams.speed == 0.0 {
-		c.SpeechParams.speed = speechSpeed
+	if c.SpeechParams.Speed == 0.0 {
+		c.SpeechParams.Speed = speechSpeed
 	}
 
-	// define sex for russian premium voice
-	if c.SpeechParams.voice == "female" {
-		c.SpeechParams.voice = "alena"
-	} else if c.SpeechParams.voice == "male" {
-		c.SpeechParams.voice = "filipp"
+	// define sex for russian premium Voice
+	if c.SpeechParams.Voice == "female" {
+		c.SpeechParams.Voice = "alena"
+	} else if c.SpeechParams.Voice == "male" {
+		c.SpeechParams.Voice = "filipp"
 	} else {
 		// set default
-		c.SpeechParams.voice = "filipp"
+		c.SpeechParams.Voice = "filipp"
 	}
 
-	if c.SpeechParams.emotion == "" {
-		c.SpeechParams.emotion = speechEmotion
+	if c.SpeechParams.Emotion == "" {
+		c.SpeechParams.Emotion = speechEmotion
 	}
 
 	v := url.Values{}
 	v.Add("text", text)
-	v.Add("speed", fmt.Sprintf("%.2f", c.SpeechParams.speed))
-	v.Add("emotion", c.SpeechParams.emotion)
-	v.Add("voice", c.SpeechParams.voice)
+	v.Add("speed", fmt.Sprintf("%.2f", c.SpeechParams.Speed))
+	v.Add("emotion", c.SpeechParams.Emotion)
+	v.Add("voice", c.SpeechParams.Voice)
 	v.Add("lang", speechLanguage)
 	v.Add("format", speechFormat)
 	return v.Encode()
@@ -157,7 +156,7 @@ func (c *SpeechKitClient) doRequest(text, fileName string) error {
 		return errors.New(fmt.Sprintf("error: api occurred with status: %v", response.StatusCode))
 	}
 
-	fullFilePath := path.Join(c.pathToFiles, fileName)
+	fullFilePath := path.Join(c.PathToFiles, fileName)
 	outputFile, err := os.Create(fullFilePath)
 	if err != nil {
 		return errors.Wrap(err, "error: occurred while creating audio file")
@@ -173,7 +172,7 @@ func (c *SpeechKitClient) doRequest(text, fileName string) error {
 
 func (c *SpeechKitClient) convertToMP3(text string) error {
 	var bound int
-	pathToOutFile := path.Join(c.pathToFiles, output)
+	pathToOutFile := path.Join(c.PathToFiles, output)
 
 	if len(text) > 20 {
 		bound = 20
@@ -182,9 +181,7 @@ func (c *SpeechKitClient) convertToMP3(text string) error {
 	}
 
 	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:bound]))
-	pathToMP3 := path.Join(c.pathToFiles, mp3FileName)
-
-	fmt.Println(pathToOutFile, pathToMP3)
+	pathToMP3 := path.Join(c.PathToFiles, mp3FileName)
 
 	cmd := exec.Command(
 		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", pathToOutFile, "-vn", "-ar", "44100", "-ac", "2", "-ab", "128k", "-f", "mp3", pathToMP3,
