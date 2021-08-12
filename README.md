@@ -30,23 +30,24 @@ func main() {
 
 	apiParams := speechkit.APIParams{APIKey: API_KEY}
 
-    // define folder for mp3 audio
-    currentDir, _ := os.Getwd()
-    pathToFiles := path.Join(currentDir, "example_folder")
+        // define folder for mp3 audio
+        currentDir, _ := os.Getwd()
+        pathToFiles := path.Join(currentDir, "example_folder")
 
 	speechParams := speechkit.SpeechParams{
-        Voice: "male",
+        	Voice: "male",
 		Speed: 1.0,
-        PathToFiles: pathToFiles,
-    }
+        	PathToFiles: pathToFiles,
+        }
 
-    client := speechkit.NewSpeechKitClient(apiParams, speechParams)
+        client := speechkit.NewSpeechKitClient(apiParams, speechParams)
 
-    exampleTextForAudio := "Lorem Ipsum is simply dummy."
-    err := client.CreateAudio(exampleTextForAudio)
-    if err != nil {
-        log.Println(err))
-    }
+        exampleTextForAudio := "Lorem Ipsum is simply dummy."
+        err := client.CreateAudio(exampleTextForAudio)
+        if err != nil {
+           	log.Println(err))
+	}
+}
 
 ```
 Define Yandex Cloud service accout Api-Key:
