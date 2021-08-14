@@ -59,7 +59,7 @@ func TestConvertToMP3(t *testing.T) {
 	err := client.convertToMP3(text)
 	assert.NoError(t, err)
 
-	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:20]))
+	mp3FileName := strings.Map(removeNonUTF, fmt.Sprintf("%s.mp3", text[:30]))
 	assert.FileExists(t, path.Join(pathToMp3, mp3FileName))
 	os.Remove(path.Join(pathToMp3, mp3FileName))
 

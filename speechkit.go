@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/pkg/errors"
@@ -70,18 +71,21 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 		return errors.Wrap(err, "error: occurred while splitting the text")
 	}
 
-	for fileIndex, textPart := range textParts {
-		fileName := fmt.Sprintf("%v.ogg", fileIndex)
-		err := c.doRequest(textPart, fileName)
+	for idx := range textParts {
+		output.WriteString(fmt.Sprintf("file '%s'\n", fmt.Sprintf("%v.ogg", idx)))
+	}
 
-		if err != nil {
-			return err
-		}
-		_, err = output.WriteString(fmt.Sprintf("file '%s'\n", fileName))
+	start := time.Now()
+	for fileIndex, textPart := range textParts {
+		// TODO: make it parallel
+		err := c.doRequest(textPart, fmt.Sprintf("%v.ogg", fileIndex))
 		if err != nil {
 			return err
 		}
 	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("Requests time %s", elapsed)
 
 	if err := c.convertToMP3(text); err != nil {
 		return err
@@ -174,8 +178,8 @@ func (c *SpeechKitClient) convertToMP3(text string) error {
 	var bound int
 	pathToOutFile := path.Join(c.PathToFiles, output)
 
-	if len(text) > 20 {
-		bound = 20
+	if len(text) >= 30 {
+		bound = 30
 	} else {
 		bound = len(text)
 	}
