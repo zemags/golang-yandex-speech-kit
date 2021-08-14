@@ -1,4 +1,4 @@
-# Golang Yandex Speech Kit [![Test And Linter](https://github.com/zemags/golang-yandex-speech-kit/actions/workflows/pipeline.yml/badge.svg?branch=master)](https://github.com/zemags/golang-yandex-speech-kit/actions/workflows/pipeline.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/zemags/golang-yandex-speech-kit)](https://goreportcard.com/report/github.com/zemags/golang-yandex-speech-kit) [![Coverage Status](https://coveralls.io/repos/github/zemags/golang-yandex-speech-kit/badge.svg?branch=master&service=github)](https://coveralls.io/github/zemags/golang-yandex-speech-kit?branch=master)
+# Golang Yandex Speech Kit [![Test And Linter](https://github.com/zemags/golang-yandex-speech-kit/actions/workflows/pipeline.yml/badge.svg?branch=master)](https://github.com/zemags/golang-yandex-speech-kit/actions/workflows/pipeline.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/zemags/golang-yandex-speech-kit)](https://goreportcard.com/report/github.com/zemags/golang-yandex-speech-kit) [![Coverage Status](https://coveralls.io/repos/github/zemags/golang-yandex-speech-kit/badge.svg?branch=master)](https://coveralls.io/github/zemags/golang-yandex-speech-kit?branch=master)
 
 
 Small simple SDK to convert text to audio by Yandex Speech Kit Service.
@@ -30,23 +30,24 @@ func main() {
 
 	apiParams := speechkit.APIParams{APIKey: API_KEY}
 
-    // define folder for mp3 audio
-    currentDir, _ := os.Getwd()
-    pathToFiles := path.Join(currentDir, "example_folder")
+        // define folder for mp3 audio
+        currentDir, _ := os.Getwd()
+        pathToFiles := path.Join(currentDir, "temp_folder")
 
 	speechParams := speechkit.SpeechParams{
-        Voice: "male",
+        	Voice: "male",
 		Speed: 1.0,
-        PathToFiles: pathToFiles,
-    }
+        	PathToFiles: pathToFiles,
+        }
 
-    client := speechkit.NewSpeechKitClient(apiParams, speechParams)
+        client := speechkit.NewSpeechKitClient(apiParams, speechParams)
 
-    exampleTextForAudio := "Lorem Ipsum is simply dummy."
-    err := client.CreateAudio(exampleTextForAudio)
-    if err != nil {
-        log.Println(err))
-    }
+        exampleTextForAudio := "Lorem Ipsum is simply dummy."
+        err := client.CreateAudio(exampleTextForAudio)
+        if err != nil {
+           	log.Println(err))
+	}
+}
 
 ```
 Define Yandex Cloud service accout Api-Key:
