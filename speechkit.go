@@ -71,8 +71,13 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 		return errors.Wrap(err, "error: occurred while splitting the text")
 	}
 
+	var stringToFile string
 	for idx := range textParts {
-		output.WriteString(fmt.Sprintf("file '%s'\n", fmt.Sprintf("%v.ogg", idx)))
+		stringToFile += fmt.Sprintf("file '%s'\n", fmt.Sprintf("%v.ogg", idx))
+	}
+	_, err = output.WriteString(stringToFile)
+	if err != nil {
+		return errors.Wrap(err, "error: occurred while writing to file")
 	}
 
 	start := time.Now()
