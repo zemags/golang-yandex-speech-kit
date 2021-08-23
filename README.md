@@ -27,8 +27,9 @@ func main() {
 	if !exist {
 		error.New("Yandex cloud service account Api-Key not provided")
 	}
-
-	apiParams := speechkit.APIParams{APIKey: API_KEY}
+	
+	client := &http.Client{Timeout: 5 * time.Second}
+	apiParams := speechkit.APIParams{APIKey: API_KEY, Client: client}
 
         // define folder for mp3 audio
         currentDir, _ := os.Getwd()
