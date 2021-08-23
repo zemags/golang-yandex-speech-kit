@@ -46,7 +46,7 @@ func main() {
         exampleTextForAudio := "Lorem Ipsum is simply dummy."
         err := client.CreateAudio(exampleTextForAudio)
         if err != nil {
-           	log.Println(err))
+           	log.Println(err)
 	}
 }
 
