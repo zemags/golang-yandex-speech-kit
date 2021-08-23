@@ -1,4 +1,4 @@
-// Simple SDK to sythesize russian Voice from text with
+// Simple SDK to sythesize russian voice from text with
 // Yandex Speech Kit Service premium Voices
 
 package speechkit
@@ -22,7 +22,7 @@ import (
 const URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 
 var (
-	speechSpeed    = float32(1.0)
+	speechSpeed    = 1.0
 	speechLanguage = "ru-RU"
 	speechFormat   = "oggopus"
 	speechEmotion  = "neutral"
@@ -46,7 +46,7 @@ type APIParams struct {
 type SpeechParams struct {
 	Emotion     string
 	Voice       string
-	Speed       float32
+	Speed       float64
 	PathToFiles string
 }
 
@@ -125,9 +125,6 @@ func (c *SpeechKitClient) generateURL(text string) string {
 	if c.SpeechParams.Voice == "female" {
 		c.SpeechParams.Voice = "alena"
 	} else if c.SpeechParams.Voice == "male" {
-		c.SpeechParams.Voice = "filipp"
-	} else {
-		// set default
 		c.SpeechParams.Voice = "filipp"
 	}
 
