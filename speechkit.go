@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/pkg/errors"
@@ -80,17 +79,14 @@ func (c *SpeechKitClient) CreateAudio(text string) error {
 		return errors.Wrap(err, "error: occurred while writing to file")
 	}
 
-	start := time.Now()
+	ch := make(chan error)
 	for fileIndex, textPart := range textParts {
-		// TODO: make it parallel
-		err := c.doRequest(textPart, fmt.Sprintf("%v.ogg", fileIndex))
+		go c.doRequest(textPart, fmt.Sprintf("%v.ogg", fileIndex), ch)
+		err := <-ch
 		if err != nil {
 			return err
 		}
 	}
-
-	elapsed := time.Since(start)
-	fmt.Printf("Requests time %s", elapsed)
 
 	if err := c.convertToMP3(text); err != nil {
 		return err
@@ -143,37 +139,37 @@ func (c *SpeechKitClient) generateURL(text string) string {
 }
 
 // doRequest make request and save content in 'oggopus' format
-func (c *SpeechKitClient) doRequest(text, fileName string) error {
+func (c *SpeechKitClient) doRequest(text, fileName string, ch chan<- error) {
 	body := strings.NewReader(c.generateURL(text))
 	req, err := http.NewRequest(http.MethodPost, URL, body)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	req.Header.Add("Authorization", fmt.Sprintf("Api-Key %s", c.APIParams.APIKey))
 
 	response, err := c.APIParams.Client.Do(req)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("error: api occurred with status: %v", response.StatusCode))
+		ch <- errors.New(fmt.Sprintf("error: api occurred with status: %v", response.StatusCode))
 	}
 
 	fullFilePath := path.Join(c.PathToFiles, fileName)
 	outputFile, err := os.Create(fullFilePath)
 	if err != nil {
-		return errors.Wrap(err, "error: occurred while creating audio file")
+		ch <- errors.Wrap(err, "error: occurred while creating audio file")
 	}
 	defer outputFile.Close()
 
 	_, err = io.Copy(outputFile, response.Body)
 	if err != nil {
-		return errors.Wrap(err, "error: occurred while copying response to file")
+		ch <- errors.Wrap(err, "error: occurred while copying response to file")
 	}
-	return nil
+	ch <- nil
 }
 
 func (c *SpeechKitClient) convertToMP3(text string) error {

@@ -161,7 +161,9 @@ func TestDoRequest(t *testing.T) {
 			Voice:       "male",
 		},
 	}
-	actual := client.doRequest(text, "1.ogg")
+	ch := make(chan error)
+	go client.doRequest(text, "1.ogg", ch)
+	actual := <-ch
 	assert.Nil(t, actual)
 	assert.FileExists(t, path.Join(PathToFiles, "1.ogg"))
 	os.RemoveAll(PathToFiles)
@@ -177,14 +179,18 @@ func TestDoRequest(t *testing.T) {
 			Voice:       "male",
 		},
 	}
-	err := client.doRequest(text, "1.ogg")
+	ch = make(chan error)
+	go client.doRequest(text, "1.ogg", ch)
+	err := <-ch
 	assert.EqualError(
 		t, err, "error: api occurred with status: 401",
 	)
 
 	client.PathToFiles = "invalid path to folder"
 	client.APIKey = APIKey
-	err = client.doRequest(text, "1.ogg")
+	ch = make(chan error)
+	go client.doRequest(text, "1.ogg", ch)
+	err = <-ch
 	assert.EqualError(
 		t, err, "error: occurred while creating audio file: open invalid path to folder/1.ogg: no such file or directory",
 	)
